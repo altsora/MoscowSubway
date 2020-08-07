@@ -23,7 +23,7 @@ public class Metro {
         lines = new TreeSet<>();
         stations = new TreeSet<>();
         connections = new TreeMap<>();
-        rootLogger.info("Метро создано");
+        rootLogger.info("Метро готово к заполнению");
     }
 
     public static Metro getInstance() {
@@ -35,10 +35,7 @@ public class Metro {
 
     public void addStation(Station station) {
         stations.add(station);
-        infoLogger.info("В метро добавлена станция: \"{}\", линия: {} ({})",
-                station.getName(),
-                station.getLine().getName(),
-                station.getLine().getNumber());
+        infoLogger.info("\tДобавлена станция: {}", station.getName());
     }
 
     public void addLine(Line line) {
@@ -50,6 +47,18 @@ public class Metro {
 
     public void addConnections(Station station, TreeSet<Station> connectedStations) {
         connections.put(station, connectedStations);
+        StringBuilder sb = new StringBuilder("{");
+        connectedStations.forEach(con ->
+                sb.append(con.getName())
+                        .append("(")
+                        .append(con.getLine().getNumber())
+                        .append("); ")
+        );
+        sb.append("}");
+        infoLogger.info("Добавлено соединение станции {} ({}) со станциями: \t{}",
+                station.getName(),
+                station.getLine().getName(),
+                sb.toString());
     }
 
     public Line getLineByName(String lineName) {
@@ -59,6 +68,15 @@ public class Metro {
             }
         }
         errorLogger.error("Линия с именем {} не найдена", lineName);
+        return null;
+    }
+
+    public Line getLineByNumber(String lineNumber) {
+        for (Line line : lines) {
+            if (lineNumber.equals(line.getNumber()))
+                return line;
+        }
+        errorLogger.error("Линия с номером {} не найдена", lineNumber);
         return null;
     }
 

@@ -8,8 +8,8 @@ import lombok.Getter;
 @AllArgsConstructor
 @EqualsAndHashCode
 public class Station implements Comparable<Station> {
-    private Line line;
     private String name;
+    private Line line;
 
     @Override
     public int compareTo(Station station) {

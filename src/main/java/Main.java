@@ -1,18 +1,18 @@
 import lombok.Getter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jsoup.nodes.Document;
+import utils.JsonUtil;
 import utils.ParsingUtil;
 
 @Getter
 public class Main {
-//    private static final Marker errorMarker = MarkerManager.getMarker("ERRORS");
-    public static Logger rootLogger = LogManager.getRootLogger();
+    private static final Logger rootLogger = LogManager.getRootLogger();
+    private final static String JSON_FILE = "result/metro.json";
 
     public static void main(String[] args) {
-        Document doc = ParsingUtil.getNewDocument();
-//        System.out.println("Hello");
-//        rootLogger.info("Start");
-//        rootLogger.error(errorMarker, "Ошибка");
+        ParsingUtil.parseWikiPage();
+        JsonUtil.createJsonFile(JSON_FILE);
+        JsonUtil.showMetroInfo(JSON_FILE);
+        rootLogger.info("Завершение программы");
     }
 }

@@ -23,7 +23,7 @@ public class Metro {
         lines = new TreeSet<>();
         stations = new TreeSet<>();
         connections = new TreeMap<>();
-        rootLogger.info("Метро готово к заполнению");
+        rootLogger.info("Метро готово к построению");
     }
 
     public static Metro getInstance() {

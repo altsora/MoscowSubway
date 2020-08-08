@@ -21,6 +21,13 @@ public class JsonUtil {
     private final static Logger errorLogger = LogManager.getLogger("errorLogger");
 
     private static Metro metro = Metro.getInstance();
+    private final static String KEY_STATIONS = "stations";
+    private final static String KEY_CONNECTIONS = "connections";
+    private final static String KEY_TRANSFER = "transfer";
+    private final static String KEY_STATION_FROM = "stationFrom";
+    private final static String KEY_LINE_NUMBER_FROM = "lineFrom";
+    private final static String KEY_STATION_TO = "stationTo";
+    private final static String KEY_LINE_NUMBER_TO = "lineTo";
 
     public static void createJsonFile(String fileName) {
         rootLogger.info("Создание JSON-файла");
@@ -28,8 +35,8 @@ public class JsonUtil {
             JSONObject json = createParentJsonObject();
             String jsonString = new ObjectMapper()
                     .writerWithDefaultPrettyPrinter()
-                    .writeValueAsString(json);                              // Строка с содержимым JSON
-            fileWriter.write(jsonString);                                   // Записывает строку в JSON-файл
+                    .writeValueAsString(json);
+            fileWriter.write(jsonString);
         } catch (IOException ex) {
             ex.printStackTrace();
             errorLogger.error(ex.getMessage(), ex);
@@ -37,34 +44,67 @@ public class JsonUtil {
         rootLogger.info("JSON-файл готов!");
     }
 
-    public static void showMetroInfo(String fileName) {
+    public static void showInfoAboutLinesAndStations(String fileName) {
         try {
             JSONParser parser = new JSONParser();
             JSONObject json = (JSONObject) parser.parse(getJsonString(fileName));
 
-            JSONObject stationsObject = (JSONObject) json.get("stations");
+            JSONObject stationsObject = (JSONObject) json.get(KEY_STATIONS);
             TreeSet<Line> lines = new TreeSet<>();
             stationsObject.keySet().forEach(lineNumberObject -> {
                 String lineNumber = (String) lineNumberObject;
                 Line line = metro.getLineByNumber(lineNumber);
                 lines.add(line);
             });
-            StringBuilder sb = new StringBuilder();
+            System.out.println("Вывод информации о метро:");
             for (Line line : lines) {
                 String info = String.format("%40s (№ %4s)\t:\t%2d станций",
                         line.getName(),
                         line.getNumber(),
                         line.getStations().size()
                 );
-                sb.append(info).append("\n");
-
+                System.out.println(info);
             }
-            rootLogger.info("Вывод информации о метро: \n{}", sb.toString());
         } catch (Exception ex) {
             ex.printStackTrace();
             errorLogger.error(ex.getMessage(), ex);
         }
     }
+
+    public static void showInfoAboutConnections(String fileName) {
+        try {
+            JSONParser parser = new JSONParser();
+            JSONObject json = (JSONObject) parser.parse(getJsonString(fileName));
+
+            JSONArray connectionsObj = (JSONArray) json.get(KEY_CONNECTIONS);
+            String format = "Станция \"%s\" (%s) соединяется с:\n";
+            System.out.println("\nПересадки:");
+            for (Object connectionObj : connectionsObj) {
+                JSONObject connection = (JSONObject) connectionObj;
+
+                String stationFrom = (String) connection.get(KEY_STATION_FROM);
+                String lineNumberFrom = (String) connection.get(KEY_LINE_NUMBER_FROM);
+                Line lineFrom = metro.getLineByNumber(lineNumberFrom);
+
+                JSONArray transfersObj = (JSONArray) connection.get(KEY_TRANSFER);
+                System.out.printf(format, stationFrom, lineFrom.getName());
+                for (Object transferObj : transfersObj) {
+                    JSONObject transfer = (JSONObject) transferObj;
+                    String stationTo = (String) transfer.get(KEY_STATION_TO);
+                    String lineNumberTo = (String) transfer.get(KEY_LINE_NUMBER_TO);
+                    Line lineTo = metro.getLineByNumber(lineNumberTo);
+                    System.out.printf("\tСтанция \"%s\" (%s)\n", stationTo, lineTo.getName());
+                }
+                System.out.println();
+            }
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            errorLogger.error(ex.getMessage(), ex);
+        }
+    }
+
+    //==================================================================================================================
 
     private static JSONObject createParentJsonObject() {
         JSONObject obj = new JSONObject();
